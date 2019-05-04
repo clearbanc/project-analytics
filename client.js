@@ -157,6 +157,32 @@
     chart.draw(data, options);
   }
 
+  function renderUnplannedWorkChart() {
+    var element = document.getElementById('monthly-unplanned-work-chart');
+    var chart = new window.google.visualization.ColumnChart(element);
+    var data = new window.google.visualization.DataTable();
+
+    data.addColumn('date', 'Date');
+    data.addColumn('number', 'Stories');
+    data.addRows(window.Data.MonthlyUnplannedWorkChart.slice(-12));
+
+    var options = {
+      title: 'Monthly Unplanned Work, Last 12 Months',
+      titleTextStyle: { fontSize: 16 },
+      focusTarget: 'category',
+      isStacked: true,
+      chartArea: chartAreaOptions,
+      trendlines: {
+        0: {
+          type: 'exponential'
+        }
+      },
+      legend: 'none'
+    };
+
+    chart.draw(data, options);
+  }
+
   function renderProjectSelect() {
     var element = document.getElementById('project-selector');
     var html = '<option>Select Project...</option>';
@@ -232,6 +258,7 @@
     // TODO: Enable once we actually start estimating
     // renderEstimateRatiosChart();
     renderCycleTimeChart();
+    renderUnplannedWorkChart();
   }
 
   function initGoogleLibrary() {

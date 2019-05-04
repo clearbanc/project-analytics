@@ -167,20 +167,24 @@ function calculateCycleTimeChartData(stories, dateRange) {
   return data;
 }
 
-function calculateEstimateChartData(stories) {
-  var estimates = { None: 0 };
+function calculateUnplannedWork(stories, dateRange) {
+  var data = 'Data.MonthlyUnplannedWorkChart = [\n';
+  var unplannedWork = 0;
 
-  _.each(stories, function (story) {
-    var estimate = _.isNumber(story.estimate) ? story.estimate : 'None';
+  _.each(dateRange, function (day) {
+    _.each(stories, function (story) {
+      if (story.created_at.split('T')[0] === day && story.labels.map(({ name }) => name).includes('unplanned')) {
+        unplannedWork += 1;
+      }
+    });
 
-    if (estimates[estimate]) {
-      estimates[estimate]++;
-    } else {
-      estimates[estimate] = 1;
+    if (day.split('-')[2] === '01') {
+      data += '  [new Date("' + day + '"), ' + unplannedWork + '],\n';
+      unplannedWork = 0;
     }
   });
 
-  var data = 'Data.EstimateChart = ' + JSON.stringify(estimates) + ';\n';
+  data += '];\n';
 
   return data;
 }
@@ -217,6 +221,7 @@ function compileChartData(stories, project) {
   data += calculateStoryRatioData(stories, dateRange);
   data += calculateMonthlyVelocityChartData(stories, dateRange);
   data += calculateCycleTimeChartData(stories, dateRange);
+  data += calculateUnplannedWork(stories, dateRange);
   // TODO: Enable once we actually start estimating
   // data += calculateEstimateChartData(stories);
 
