@@ -36,28 +36,29 @@
     chart.draw(data, options);
   }
 
-  function renderEstimateRatiosChart() {
-    var element = document.getElementById('estimate-ratios');
-    var chart = new window.google.visualization.BarChart(element);
-    var a = [['Story Estimate', 'Story Count']];
+  // TODO: Enable once we actually start estimating
+  // function renderEstimateRatiosChart() {
+  //   var element = document.getElementById('estimate-ratios');
+  //   var chart = new window.google.visualization.BarChart(element);
+  //   var a = [['Story Estimate', 'Story Count']];
 
-    for (var key in window.Data.EstimateChart) {
-      if (window.Data.EstimateChart.hasOwnProperty(key)) {
-        a.push([key, window.Data.EstimateChart[key]]);
-      }
-    }
+  //   for (var key in window.Data.EstimateChart) {
+  //     if (window.Data.EstimateChart.hasOwnProperty(key)) {
+  //       a.push([key, window.Data.EstimateChart[key]]);
+  //     }
+  //   }
 
-    var data = new window.google.visualization.arrayToDataTable(a);
+  //   var data = new window.google.visualization.arrayToDataTable(a);
 
-    var options = {
-      title: 'Story Estimate Distribution',
-      titleTextStyle: { fontSize: 16 },
-      chartArea: chartAreaOptions,
-      legend: 'none'
-    };
+  //   var options = {
+  //     title: 'Story Estimate Distribution',
+  //     titleTextStyle: { fontSize: 16 },
+  //     chartArea: chartAreaOptions,
+  //     legend: 'none'
+  //   };
 
-    chart.draw(data, options);
-  }
+  //   chart.draw(data, options);
+  // }
 
   function renderStoryTypeRatioChart() {
     var element = document.getElementById('story-type-ratios');
@@ -228,7 +229,8 @@
     renderStoryTypeRatioChart();
     renderStoryTypeChart();
     renderMonthlyVelocityChart();
-    renderEstimateRatiosChart();
+    // TODO: Enable once we actually start estimating
+    // renderEstimateRatiosChart();
     renderCycleTimeChart();
   }
 

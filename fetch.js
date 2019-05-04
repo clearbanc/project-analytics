@@ -70,6 +70,7 @@ function calculateStoryRatioData(stories, dateRange) {
         totals[story.story_type] += 1;
         totals.total += 1;
 
+        // TODO: Enable once we actually start estimating
         // Measure by points:
         // if (story.estimate) {
         //   totals[story.story_type] += story.estimate;
@@ -98,6 +99,7 @@ function calculateStoryTypeData(stories, dateRange) {
         // Measure by story count:
         totals[story.story_type] += 1;
 
+        // TODO: Enable once we actually start estimating
         // Measure by points:
         // if (story.estimate) {
         //   totals[story.story_type] += story.estimate;
@@ -122,6 +124,7 @@ function calculateMonthlyVelocityChartData(stories, dateRange) {
         // Measure by story count:
         velocity += 1;
 
+        // TODO: Enable once we actually start estimating
         // Measure by points:
         // if (story.estimate) {
         //   velocity += story.estimate;
@@ -182,6 +185,25 @@ function calculateEstimateChartData(stories) {
   return data;
 }
 
+// TODO: Enable once we actually start estimating
+// function calculateEstimateChartData(stories) {
+//   var estimates = { None: 0 };
+
+//   _.each(stories, function (story) {
+//     var estimate = _.isNumber(story.estimate) ? story.estimate : 'None';
+
+//     if (estimates[estimate]) {
+//       estimates[estimate]++;
+//     } else {
+//       estimates[estimate] = 1;
+//     }
+//   });
+
+//   var data = 'Data.EstimateChart = ' + JSON.stringify(estimates) + ';\n';
+
+//   return data;
+// }
+
 function compileChartData(stories, project) {
   console.log('Compiling story data...');
   stories = _.sortBy(stories, function (story) {
@@ -195,7 +217,8 @@ function compileChartData(stories, project) {
   data += calculateStoryRatioData(stories, dateRange);
   data += calculateMonthlyVelocityChartData(stories, dateRange);
   data += calculateCycleTimeChartData(stories, dateRange);
-  data += calculateEstimateChartData(stories);
+  // TODO: Enable once we actually start estimating
+  // data += calculateEstimateChartData(stories);
 
   fs.writeFileSync('data/project-' + project.id + '.js', data);
 }
