@@ -6,7 +6,8 @@ var request = require('request');
 
 var MILLISECONDS_IN_A_DAY = 1000 * 60 * 60 * 24;
 var DATE_FORMAT = 'YYYY-MM-DD';
-var PROJECT_FILE = 'data/projects.js';
+var PROJECT_FOLDER = './data';
+var PROJECT_FILE = `${PROJECT_FOLDER}/projects.js`;
 
 var TOKEN = process.env.CLUBHOUSE_API_TOKEN;
 
@@ -281,6 +282,10 @@ function displayNoTokenMessage() {
 function init() {
   if (!TOKEN) {
     return displayNoTokenMessage();
+  }
+
+  if (!fs.existsSync(PROJECT_FOLDER)) {
+    fs.mkdirSync(PROJECT_FOLDER);
   }
 
   compileProjectData();
