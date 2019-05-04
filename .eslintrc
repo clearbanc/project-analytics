@@ -1,6 +1,8 @@
-// Rules: http://eslint.org/docs/rules/
 {
   "extends": "eslint:recommended",
+  "parserOptions": {
+    "ecmaVersion": 2018
+  },
   "rules": {
     "comma-dangle": 2,
     "comma-spacing": 2,
@@ -9,18 +11,51 @@
     "eol-last": 2,
     "eqeqeq": 2,
     "guard-for-in": 2,
-    "indent": [2, 2],
-    "key-spacing": [2, { "beforeColon": false }],
+    "indent": [
+      2,
+      2
+    ],
+    "key-spacing": [
+      2,
+      {
+        "beforeColon": false
+      }
+    ],
     "no-console": 0,
     "no-eval": 2,
     "no-implied-eval": 2,
-    "no-multiple-empty-lines": [2, { "max": 1, "maxEOF": 1 }],
+    "no-multiple-empty-lines": [
+      2,
+      {
+        "max": 1,
+        "maxEOF": 1
+      }
+    ],
     "no-trailing-spaces": 2,
-    "object-curly-spacing": [2, "always"],
-    "operator-linebreak": [2, "after"],
-    "quotes": [2, "single", "avoid-escape"],
-    "semi": [2, "always"],
-    "space-before-function-paren": [2, { "anonymous": "always", "named": "never" }]
+    "object-curly-spacing": [
+      2,
+      "always"
+    ],
+    "operator-linebreak": [
+      2,
+      "after"
+    ],
+    "quotes": [
+      2,
+      "single",
+      "avoid-escape"
+    ],
+    "semi": [
+      2,
+      "always"
+    ],
+    "space-before-function-paren": [
+      2,
+      {
+        "anonymous": "always",
+        "named": "never"
+      }
+    ]
   },
   "env": {
     "browser": true,
