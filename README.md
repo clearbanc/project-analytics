@@ -10,7 +10,7 @@ Install [Node.js](https://nodejs.org/en/download/) on your machine if you don't 
 
 ```shell
 # Clone the repo.
-git clone git@github.com:clubhouse/project-analytics.git
+git clone git@github.com:clearbanc/project-analytics.git
 cd project-analytics
 
 # Install node dependencies. You only need to do this once.
