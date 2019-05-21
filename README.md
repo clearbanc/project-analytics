@@ -4,7 +4,7 @@
 
 A library that fetches data from your Clubhouse organization and displays various metrics using Google Charts. Demonstrates how to combine [the Clubhouse API](https://clubhouse.io/api) and [Google Charts](https://developers.google.com/chart/interactive/docs/gallery) to create an analytics dashboard that measures any arbitrary aspect of your Clubhouse data.
 
-### Installation
+## Installation
 
 Install [Node.js](https://nodejs.org/en/download/) on your machine if you don't already have it installed.
 
@@ -21,7 +21,7 @@ npm install
 CLUBHOUSE_API_TOKEN="MY TOKEN"
 ```
 
-### Usage
+## Usage
 
 ```shell
 # Fetch and compile your data by project. You can use a partial project name,
@@ -35,3 +35,12 @@ node fetch.js all
 # Finally, open the HTML file in your browser and select a project:
 open index.html
 ```
+
+## TODO
+
+Things that would be nice to add:
+
+- GitHub integration
+  - Track hotfixes
+- GCP integration
+  - Track incidents in Error Reporting (e.g. total, unique, etc).
