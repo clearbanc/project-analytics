@@ -12,19 +12,29 @@ var PROJECT_FILE = `${PROJECT_FOLDER}/projects.js`;
 var TOKEN = process.env.CLUBHOUSE_API_TOKEN;
 
 function fetchProjects(callback) {
-  request({
-    url: 'https://api.clubhouse.io/api/beta/projects?token=' + TOKEN,
-    json: true
-  }, callback);
+  request(
+    {
+      url: 'https://api.clubhouse.io/api/beta/projects?token=' + TOKEN,
+      json: true,
+    },
+    callback,
+  );
 }
 
 function fetchCompletedStoriesForProject(projectID, callback) {
-  request({
-    url: 'https://api.clubhouse.io/api/beta/stories/search?token=' + TOKEN,
-    method: 'POST',
-    json: true,
-    body: { archived: false, project_ids: [projectID], workflow_state_types: ['done'] }
-  }, callback);
+  request(
+    {
+      url: 'https://api.clubhouse.io/api/beta/stories/search?token=' + TOKEN,
+      method: 'POST',
+      json: true,
+      body: {
+        archived: false,
+        project_ids: [projectID],
+        workflow_state_types: ['done'],
+      },
+    },
+    callback,
+  );
 }
 
 function createDateRange(fromDate, toDate) {
@@ -41,7 +51,7 @@ function createDateRange(fromDate, toDate) {
 }
 
 function storiesToCompletedTimestamps(stories) {
-  return _.map(stories, function (story) {
+  return _.map(stories, function(story) {
     return new Date(story.completed_at).getTime();
   });
 }
@@ -60,11 +70,11 @@ function calculateStoryRatioData(stories, dateRange) {
     feature: 0,
     bug: 0,
     chore: 0,
-    total: 0
+    total: 0,
   };
 
-  _.each(dateRange, function (day) {
-    _.each(stories, function (story) {
+  _.each(dateRange, function(day) {
+    _.each(stories, function(story) {
       if (story.completed_at.split('T')[0] === day) {
         // Measure by story count:
         totals[story.story_type] += 1;
@@ -77,7 +87,16 @@ function calculateStoryRatioData(stories, dateRange) {
         // }
       }
     });
-    data += '  [new Date("' + day + '"), ' + (totals.feature / totals.total) + ', ' + (totals.bug / totals.total) + ', ' + (totals.chore / totals.total) + '],\n';
+    data +=
+      '  [new Date("' +
+      day +
+      '"), ' +
+      totals.feature / totals.total +
+      ', ' +
+      totals.bug / totals.total +
+      ', ' +
+      totals.chore / totals.total +
+      '],\n';
   });
 
   data += '];\n';
@@ -90,11 +109,11 @@ function calculateStoryTypeData(stories, dateRange) {
   var totals = {
     feature: 0,
     bug: 0,
-    chore: 0
+    chore: 0,
   };
 
-  _.each(dateRange, function (day) {
-    _.each(stories, function (story) {
+  _.each(dateRange, function(day) {
+    _.each(stories, function(story) {
       if (story.completed_at.split('T')[0] === day) {
         // Measure by story count:
         totals[story.story_type] += 1;
@@ -106,7 +125,16 @@ function calculateStoryTypeData(stories, dateRange) {
         // }
       }
     });
-    data += '  [new Date("' + day + '"), ' + totals.feature + ', ' + totals.bug + ', ' + totals.chore + '],\n';
+    data +=
+      '  [new Date("' +
+      day +
+      '"), ' +
+      totals.feature +
+      ', ' +
+      totals.bug +
+      ', ' +
+      totals.chore +
+      '],\n';
   });
 
   data += '];\n';
@@ -118,8 +146,8 @@ function calculateMonthlyVelocityChartData(stories, dateRange) {
   var data = 'Data.MonthlyVelocityChart = [\n';
   var velocity = 0;
 
-  _.each(dateRange, function (day) {
-    _.each(stories, function (story) {
+  _.each(dateRange, function(day) {
+    _.each(stories, function(story) {
       if (story.completed_at.split('T')[0] === day) {
         // Measure by story count:
         velocity += 1;
@@ -147,17 +175,29 @@ function calculateCycleTimeChartData(stories, dateRange) {
   var data = 'Data.CycleTimeChart = [\n';
   var cycleTimes = [];
 
-  _.each(dateRange, function (day) {
-    _.each(stories, function (story) {
+  _.each(dateRange, function(day) {
+    _.each(stories, function(story) {
       if (story.completed_at.split('T')[0] === day) {
-        var cycleTime = (new Date(story.completed_at).getTime() - new Date(story.started_at).getTime()) / MILLISECONDS_IN_A_DAY;
+        var cycleTime =
+          (new Date(story.completed_at).getTime() -
+            new Date(story.started_at).getTime()) /
+          MILLISECONDS_IN_A_DAY;
 
         cycleTimes.push(cycleTime);
       }
     });
 
     if (day.split('-')[2] === '01') {
-      data += '  [new Date("' + day + '"), ' + _.max(cycleTimes) + ', ' + _.mean(cycleTimes) + ', ' + _.min(cycleTimes) + '],\n';
+      data +=
+        '  [new Date("' +
+        day +
+        '"), ' +
+        _.max(cycleTimes) +
+        ', ' +
+        _.mean(cycleTimes) +
+        ', ' +
+        _.min(cycleTimes) +
+        '],\n';
       cycleTimes = [];
     }
   });
@@ -171,9 +211,12 @@ function calculateUnplannedWork(stories, dateRange) {
   var data = 'Data.MonthlyUnplannedWorkChart = [\n';
   var unplannedWork = 0;
 
-  _.each(dateRange, function (day) {
-    _.each(stories, function (story) {
-      if (story.created_at.split('T')[0] === day && story.labels.map(({ name }) => name).includes('unplanned')) {
+  _.each(dateRange, function(day) {
+    _.each(stories, function(story) {
+      if (
+        story.created_at.split('T')[0] === day &&
+        story.labels.map(({ name }) => name).includes('unplanned')
+      ) {
         unplannedWork += 1;
       }
     });
@@ -210,13 +253,18 @@ function calculateUnplannedWork(stories, dateRange) {
 
 function compileChartData(stories, project) {
   console.log('Compiling story data...');
-  stories = _.sortBy(stories, function (story) {
+  stories = _.sortBy(stories, function(story) {
     return new Date(story.completed_at).getTime();
   });
 
   var dateRange = calculateDateRangeForStories(stories);
 
-  var data = 'var Data = {}; Data.ProjectName = "' + project.name + '"; Data.LastFetched="' + moment().format('MMMM D, YYYY') + '"; ';
+  var data =
+    'var Data = {}; Data.ProjectName = "' +
+    project.name +
+    '"; Data.LastFetched="' +
+    moment().format('MMMM D, YYYY') +
+    '"; ';
   data += calculateStoryTypeData(stories, dateRange);
   data += calculateStoryRatioData(stories, dateRange);
   data += calculateMonthlyVelocityChartData(stories, dateRange);
@@ -230,20 +278,32 @@ function compileChartData(stories, project) {
 
 function saveProjectsToFile(projects) {
   var data = 'var ClubhouseProjects = [];';
-  _.each(_.filter(projects, { archived: false }), function (project) {
-    data += 'ClubhouseProjects.push({ id: ' + project.id + ', name: "' + project.name + '" });';
+  _.each(_.filter(projects, { archived: false }), function(project) {
+    data +=
+      'ClubhouseProjects.push({ id: ' +
+      project.id +
+      ', name: "' +
+      project.name +
+      '" });';
   });
-  _.each(_.filter(projects, { archived: true }), function (project) {
-    data += 'ClubhouseProjects.push({ id: ' + project.id + ', name: "' + project.name + ' (archived)" });';
+  _.each(_.filter(projects, { archived: true }), function(project) {
+    data +=
+      'ClubhouseProjects.push({ id: ' +
+      project.id +
+      ', name: "' +
+      project.name +
+      ' (archived)" });';
   });
   fs.writeFileSync(PROJECT_FILE, data);
 }
 
 function fetchAndCompileChartForProject(project, callback) {
   callback = _.isFunction(callback) ? callback : _.noop;
-  console.log('Fetching completed stories for project "' + project.name + '"...');
+  console.log(
+    'Fetching completed stories for project "' + project.name + '"...',
+  );
 
-  fetchCompletedStoriesForProject(project.id, function (err, res, stories) {
+  fetchCompletedStoriesForProject(project.id, function(err, res, stories) {
     compileChartData(stories, project);
     callback();
   });
@@ -253,7 +313,7 @@ function fetchAndCompileChartsForAllProjects(projects) {
   var project = projects.shift();
 
   if (project) {
-    fetchAndCompileChartForProject(project, function () {
+    fetchAndCompileChartForProject(project, function() {
       fetchAndCompileChartsForAllProjects(projects);
     });
   }
@@ -264,8 +324,11 @@ function findMatchingProjects(projects, query) {
     return _.filter(projects, { archived: false });
   }
 
-  return _.filter(projects, function (project) {
-    return parseInt(query, 10) === project.id || project.name.toLowerCase().indexOf(query) === 0;
+  return _.filter(projects, function(project) {
+    return (
+      parseInt(query, 10) === project.id ||
+      project.name.toLowerCase().indexOf(query) === 0
+    );
   });
 }
 
@@ -273,7 +336,7 @@ function compileProjectData() {
   var query = process.argv[2];
   console.log('Fetching projects...');
 
-  fetchProjects(function (err, res, projects) {
+  fetchProjects(function(err, res, projects) {
     if (err || !projects || projects.length === 0) {
       console.log('No projects found!');
       return false;
@@ -289,7 +352,7 @@ function compileProjectData() {
       }
       console.log('You have access to the following projects:\n');
 
-      projects.forEach(function (project) {
+      projects.forEach(function(project) {
         console.log('  - ' + project.name);
       });
 
@@ -302,7 +365,9 @@ function compileProjectData() {
 
 function displayNoTokenMessage() {
   console.log('Missing CLUBHOUSE_API_TOKEN environment variable.');
-  console.log('If you don\'t already have one, go to Clubhouse > Settings > Your Account > API Tokens to create one.');
+  console.log(
+    "If you don't already have one, go to Clubhouse > Settings > Your Account > API Tokens to create one.",
+  );
   console.log('Then run this command:');
   console.log('CLUBHOUSE_API_TOKEN="MYTOKEN"');
 }

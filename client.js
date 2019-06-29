@@ -1,11 +1,10 @@
-(function () {
-
+(function() {
   var timeout = null;
   var chartAreaOptions = {
     bottom: 50,
     top: 50,
     left: 70,
-    right: 28
+    right: 28,
   };
 
   function loadScript(src) {
@@ -18,19 +17,20 @@
   function renderCurrentStoryTypeRatioChart() {
     var element = document.getElementById('current-story-type-ratio');
     var chart = new window.google.visualization.PieChart(element);
-    var mostRecentRatio = window.Data.StoryTypeRatios[window.Data.StoryTypeRatios.length - 1];
+    var mostRecentRatio =
+      window.Data.StoryTypeRatios[window.Data.StoryTypeRatios.length - 1];
     var data = new window.google.visualization.arrayToDataTable([
       ['Story Type', 'Current Ratio'],
       ['Features', mostRecentRatio[1]],
       ['Bugs', mostRecentRatio[2]],
-      ['Chores', mostRecentRatio[3]]
+      ['Chores', mostRecentRatio[3]],
     ]);
 
     var options = {
       title: 'Current Story Type Ratio',
       titleTextStyle: { fontSize: 16 },
       chartArea: chartAreaOptions,
-      pieHole: 0.4
+      pieHole: 0.4,
     };
 
     chart.draw(data, options);
@@ -79,8 +79,8 @@
       legend: 'none',
       chartArea: chartAreaOptions,
       vAxis: {
-        format: '#%'
-      }
+        format: '#%',
+      },
     };
 
     chart.draw(data, options);
@@ -103,7 +103,7 @@
       isStacked: true,
       chartArea: chartAreaOptions,
       focusTarget: 'category',
-      legend: 'none'
+      legend: 'none',
     };
 
     chart.draw(data, options);
@@ -126,10 +126,10 @@
       chartArea: chartAreaOptions,
       trendlines: {
         0: {
-          type: 'exponential'
-        }
+          type: 'exponential',
+        },
       },
-      legend: 'none'
+      legend: 'none',
     };
 
     chart.draw(data, options);
@@ -151,7 +151,7 @@
       titleTextStyle: { fontSize: 16 },
       focusTarget: 'category',
       chartArea: chartAreaOptions,
-      legend: 'none'
+      legend: 'none',
     };
 
     chart.draw(data, options);
@@ -174,10 +174,10 @@
       chartArea: chartAreaOptions,
       trendlines: {
         0: {
-          type: 'exponential'
-        }
+          type: 'exponential',
+        },
       },
-      legend: 'none'
+      legend: 'none',
     };
 
     chart.draw(data, options);
@@ -186,8 +186,9 @@
   function renderProjectSelect() {
     var element = document.getElementById('project-selector');
     var html = '<option>Select Project...</option>';
-    window.ClubhouseProjects.forEach(function (project) {
-      html += '<option value="' + project.id + '">' + project.name + '</option>';
+    window.ClubhouseProjects.forEach(function(project) {
+      html +=
+        '<option value="' + project.id + '">' + project.name + '</option>';
     });
 
     element.innerHTML = html;
@@ -199,7 +200,7 @@
     return element.options[element.selectedIndex].value;
   }
 
-  window.onProjectSelect = function () {
+  window.onProjectSelect = function() {
     var id = getSelectedProjectID();
     window.Data = null;
     loadScript('data/project-' + id + '.js');
@@ -209,7 +210,10 @@
 
   function renderNoDataForProject() {
     var element = document.getElementById('no-chart-found');
-    element.innerHTML = 'No data found for this project! Run <code>node fetch.js ' + getSelectedProjectID() + '</code> in your terminal to generate the data.';
+    element.innerHTML =
+      'No data found for this project! Run <code>node fetch.js ' +
+      getSelectedProjectID() +
+      '</code> in your terminal to generate the data.';
     element.style.display = 'block';
 
     document.getElementById('chart-container').style.display = 'none';
@@ -225,7 +229,10 @@
 
   function renderLastFetched() {
     var element = document.getElementById('last-fetched');
-    element.innerHTML = 'This data was fetched on <strong>' + window.Data.LastFetched + '</strong>.';
+    element.innerHTML =
+      'This data was fetched on <strong>' +
+      window.Data.LastFetched +
+      '</strong>.';
   }
 
   function renderCharts(counter) {
@@ -242,7 +249,7 @@
 
     if (!window.Data) {
       clearTimeout(timeout);
-      timeout = setTimeout(function () {
+      timeout = setTimeout(function() {
         renderCharts(counter);
       }, 100);
       return false;
@@ -271,5 +278,4 @@
   }
 
   init();
-
-}());
+})();
