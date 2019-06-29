@@ -15,9 +15,9 @@
     "google charts"
   ],
   "dependencies": {
-    "request": "*",
-    "lodash": "*",
-    "moment": "*"
+    "request": "2.88.0",
+    "lodash": "4.17.11",
+    "moment": "2.24.0"
   },
   "license": "MIT"
 }

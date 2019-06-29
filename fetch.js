@@ -65,7 +65,7 @@ function calculateDateRangeForStories(stories) {
 }
 
 function calculateStoryRatioData(stories, dateRange) {
-  var data = 'Data.StoryTypeRatios = [\n';
+  var data = '';
   var totals = {
     feature: 0,
     bug: 0,
@@ -88,7 +88,7 @@ function calculateStoryRatioData(stories, dateRange) {
       }
     });
     data +=
-      '  [new Date("' +
+      'window.Data.StoryTypeRatios.push([new Date("' +
       day +
       '"), ' +
       totals.feature / totals.total +
@@ -96,16 +96,14 @@ function calculateStoryRatioData(stories, dateRange) {
       totals.bug / totals.total +
       ', ' +
       totals.chore / totals.total +
-      '],\n';
+      ']);\n';
   });
-
-  data += '];\n';
 
   return data;
 }
 
 function calculateStoryTypeData(stories, dateRange) {
-  var data = 'Data.StoryTypeData = [\n';
+  var data = '';
   var totals = {
     feature: 0,
     bug: 0,
@@ -125,8 +123,11 @@ function calculateStoryTypeData(stories, dateRange) {
         // }
       }
     });
+
+    data += '';
+
     data +=
-      '  [new Date("' +
+      'window.Data.StoryTypeData.push([new Date("' +
       day +
       '"), ' +
       totals.feature +
@@ -134,45 +135,49 @@ function calculateStoryTypeData(stories, dateRange) {
       totals.bug +
       ', ' +
       totals.chore +
-      '],\n';
+      ']);\n';
   });
-
-  data += '];\n';
 
   return data;
 }
 
 function calculateMonthlyVelocityChartData(stories, dateRange) {
-  var data = 'Data.MonthlyVelocityChart = [\n';
+  var data = '';
+  var completedStories = 0;
   var velocity = 0;
 
   _.each(dateRange, function(day) {
     _.each(stories, function(story) {
       if (story.completed_at.split('T')[0] === day) {
         // Measure by story count:
-        velocity += 1;
+        completedStories += 1;
 
-        // TODO: Enable once we actually start estimating
         // Measure by points:
-        // if (story.estimate) {
-        //   velocity += story.estimate;
-        // }
+        if (story.estimate) {
+          velocity += story.estimate;
+        }
       }
     });
 
     if (day.split('-')[2] === '01') {
-      data += '  [new Date("' + day + '"), ' + velocity + '],\n';
+      data +=
+        'window.Data.MonthlyVelocityChart.push([new Date("' +
+        day +
+        '"), ' +
+        completedStories +
+        ', ' +
+        velocity +
+        ']);\n';
+      completedStories = 0;
       velocity = 0;
     }
   });
-
-  data += '];\n';
 
   return data;
 }
 
 function calculateCycleTimeChartData(stories, dateRange) {
-  var data = 'Data.CycleTimeChart = [\n';
+  var data = '';
   var cycleTimes = [];
 
   _.each(dateRange, function(day) {
@@ -187,9 +192,9 @@ function calculateCycleTimeChartData(stories, dateRange) {
       }
     });
 
-    if (day.split('-')[2] === '01') {
+    if (day.split('-')[2] === '01' && cycleTimes.length) {
       data +=
-        '  [new Date("' +
+        'window.Data.CycleTimeChart.push([new Date("' +
         day +
         '"), ' +
         _.max(cycleTimes) +
@@ -197,19 +202,18 @@ function calculateCycleTimeChartData(stories, dateRange) {
         _.mean(cycleTimes) +
         ', ' +
         _.min(cycleTimes) +
-        '],\n';
+        ']);\n';
       cycleTimes = [];
     }
   });
-
-  data += '];\n';
 
   return data;
 }
 
 function calculateUnplannedWork(stories, dateRange) {
-  var data = 'Data.MonthlyUnplannedWorkChart = [\n';
+  var data = '';
   var unplannedWork = 0;
+  var velocity = 0;
 
   _.each(dateRange, function(day) {
     _.each(stories, function(story) {
@@ -218,16 +222,27 @@ function calculateUnplannedWork(stories, dateRange) {
         story.labels.map(({ name }) => name).includes('unplanned')
       ) {
         unplannedWork += 1;
+
+        // Measure by points:
+        if (story.estimate) {
+          velocity += story.estimate;
+        }
       }
     });
 
     if (day.split('-')[2] === '01') {
-      data += '  [new Date("' + day + '"), ' + unplannedWork + '],\n';
+      data +=
+        'window.Data.MonthlyUnplannedWorkChart.push([new Date("' +
+        day +
+        '"), ' +
+        unplannedWork +
+        ', ' +
+        velocity +
+        ']);\n';
       unplannedWork = 0;
+      velocity = 0;
     }
   });
-
-  data += '];\n';
 
   return data;
 }
@@ -260,11 +275,11 @@ function compileChartData(stories, project) {
   var dateRange = calculateDateRangeForStories(stories);
 
   var data =
-    'var Data = {}; Data.ProjectName = "' +
+    'window.Data.ProjectName = "' +
     project.name +
-    '"; Data.LastFetched="' +
+    '"; window.Data.LastFetched="' +
     moment().format('MMMM D, YYYY') +
-    '"; ';
+    '";';
   data += calculateStoryTypeData(stories, dateRange);
   data += calculateStoryRatioData(stories, dateRange);
   data += calculateMonthlyVelocityChartData(stories, dateRange);
@@ -277,23 +292,22 @@ function compileChartData(stories, project) {
 }
 
 function saveProjectsToFile(projects) {
-  var data = 'var ClubhouseProjects = [];';
+  var data = 'var ClubhouseProjects = [];\n';
   _.each(_.filter(projects, { archived: false }), function(project) {
     data +=
       'ClubhouseProjects.push({ id: ' +
       project.id +
       ', name: "' +
       project.name +
-      '" });';
+      '" });\n';
   });
-  _.each(_.filter(projects, { archived: true }), function(project) {
-    data +=
-      'ClubhouseProjects.push({ id: ' +
-      project.id +
-      ', name: "' +
-      project.name +
-      ' (archived)" });';
-  });
+  data +=
+    'Data = {};\n' +
+    'Data.StoryTypeRatios = [];\n' +
+    'Data.StoryTypeData = [];\n' +
+    'Data.MonthlyVelocityChart = [];\n' +
+    'Data.CycleTimeChart = [];\n' +
+    'Data.MonthlyUnplannedWorkChart = [];';
   fs.writeFileSync(PROJECT_FILE, data);
 }
 

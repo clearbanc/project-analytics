@@ -1,5 +1,4 @@
 (function() {
-  var timeout = null;
   var chartAreaOptions = {
     bottom: 50,
     top: 50,
@@ -7,18 +6,60 @@
     right: 28,
   };
 
-  function loadScript(src) {
-    var element = document.createElement('script');
+  function loadScript(url) {
+    return new Promise(function(resolve, reject) {
+      var script = document.createElement('script');
+      script.onload = resolve;
+      script.onerror = reject;
+      script.src = url;
+      document.body.appendChild(script);
+    });
+  }
 
-    element.src = src;
-    document.body.appendChild(element);
+  function getCombinedChartData(data) {
+    return data
+      .sort(([firstDate], [secondDate]) => {
+        if (firstDate > secondDate) {
+          return 1;
+        }
+        if (firstDate < secondDate) {
+          return -1;
+        }
+
+        return 0;
+      })
+      .reduce((acc, currentValue) => {
+        if (!acc.length) {
+          return [currentValue];
+        }
+
+        const lastValue = acc[acc.length - 1];
+        const [lastDate] = lastValue;
+        const [currentDate] = currentValue;
+
+        if (moment(currentDate).isSame(moment(lastDate), 'day')) {
+          acc.pop();
+          acc.push(
+            currentValue.map((value, index) =>
+              index ? value + lastValue[index] : value,
+            ),
+          );
+        } else {
+          acc.push(currentValue);
+        }
+
+        return acc;
+      }, []);
   }
 
   function renderCurrentStoryTypeRatioChart() {
     var element = document.getElementById('current-story-type-ratio');
     var chart = new window.google.visualization.PieChart(element);
+    var combinedStoryTypeRatios = getCombinedChartData(
+      window.Data.StoryTypeRatios,
+    );
     var mostRecentRatio =
-      window.Data.StoryTypeRatios[window.Data.StoryTypeRatios.length - 1];
+      combinedStoryTypeRatios[combinedStoryTypeRatios.length - 1];
     var data = new window.google.visualization.arrayToDataTable([
       ['Story Type', 'Current Ratio'],
       ['Features', mostRecentRatio[1]],
@@ -69,7 +110,7 @@
     data.addColumn('number', 'Features');
     data.addColumn('number', 'Bugs');
     data.addColumn('number', 'Chores');
-    data.addRows(window.Data.StoryTypeRatios);
+    data.addRows(getCombinedChartData(window.Data.StoryTypeRatios));
 
     var options = {
       title: 'Story Type Ratios',
@@ -95,7 +136,7 @@
     data.addColumn('number', 'Features');
     data.addColumn('number', 'Bugs');
     data.addColumn('number', 'Chores');
-    data.addRows(window.Data.StoryTypeData);
+    data.addRows(getCombinedChartData(window.Data.StoryTypeRatios));
 
     var options = {
       title: 'Completed Stories by Story Type',
@@ -116,13 +157,16 @@
 
     data.addColumn('date', 'Date');
     data.addColumn('number', 'Stories');
-    data.addRows(window.Data.MonthlyVelocityChart.slice(-12));
+    data.addColumn('number', 'Points');
+    data.addRows(
+      getCombinedChartData(window.Data.MonthlyVelocityChart).slice(-12),
+    );
 
     var options = {
       title: 'Monthly Velocity, Last 12 Months',
       titleTextStyle: { fontSize: 16 },
       focusTarget: 'category',
-      isStacked: true,
+      isStacked: false,
       chartArea: chartAreaOptions,
       trendlines: {
         0: {
@@ -144,7 +188,7 @@
     data.addColumn('number', 'Max');
     data.addColumn('number', 'Average');
     data.addColumn('number', 'Min');
-    data.addRows(window.Data.CycleTimeChart.slice(-12));
+    data.addRows(getCombinedChartData(window.Data.CycleTimeChart).slice(-12));
 
     var options = {
       title: 'Project Cycle Time in Days, Last 12 Months',
@@ -164,13 +208,16 @@
 
     data.addColumn('date', 'Date');
     data.addColumn('number', 'Stories');
-    data.addRows(window.Data.MonthlyUnplannedWorkChart.slice(-12));
+    data.addColumn('number', 'Points');
+    data.addRows(
+      getCombinedChartData(window.Data.MonthlyUnplannedWorkChart).slice(-12),
+    );
 
     var options = {
       title: 'Monthly Unplanned Work, Last 12 Months',
       titleTextStyle: { fontSize: 16 },
       focusTarget: 'category',
-      isStacked: true,
+      isStacked: false,
       chartArea: chartAreaOptions,
       trendlines: {
         0: {
@@ -185,7 +232,8 @@
 
   function renderProjectSelect() {
     var element = document.getElementById('project-selector');
-    var html = '<option>Select Project...</option>';
+    var html =
+      '<option>Select Project...</option><option value="all">All</option>';
     window.ClubhouseProjects.forEach(function(project) {
       html +=
         '<option value="' + project.id + '">' + project.name + '</option>';
@@ -201,22 +249,32 @@
   }
 
   window.onProjectSelect = function() {
+    Object.keys(window.Data).forEach(function(key) {
+      if (Array.isArray(window.Data[key])) {
+        window.Data[key] = [];
+      }
+    });
+
     var id = getSelectedProjectID();
-    window.Data = null;
-    loadScript('data/project-' + id + '.js');
-    clearTimeout(timeout);
-    renderCharts();
+
+    const scriptLoaders =
+      id === 'all'
+        ? window.ClubhouseProjects.map(function(project) {
+            return loadScript('data/project-' + project.id + '.js');
+          })
+        : [loadScript('data/project-' + id + '.js')];
+
+    Promise.all(scriptLoaders).then(function() {
+      renderCharts();
+    });
   };
 
-  function renderNoDataForProject() {
-    var element = document.getElementById('no-chart-found');
+  function renderLastFetched() {
+    var element = document.getElementById('last-fetched');
     element.innerHTML =
-      'No data found for this project! Run <code>node fetch.js ' +
-      getSelectedProjectID() +
-      '</code> in your terminal to generate the data.';
-    element.style.display = 'block';
-
-    document.getElementById('chart-container').style.display = 'none';
+      'This data was fetched on <strong>' +
+      window.Data.LastFetched +
+      '</strong>.';
   }
 
   function hideNoDataForProject() {
@@ -227,34 +285,7 @@
     document.getElementById('chart-container').style.display = 'block';
   }
 
-  function renderLastFetched() {
-    var element = document.getElementById('last-fetched');
-    element.innerHTML =
-      'This data was fetched on <strong>' +
-      window.Data.LastFetched +
-      '</strong>.';
-  }
-
-  function renderCharts(counter) {
-    if (counter) {
-      counter += 1;
-    } else {
-      counter = 1;
-    }
-
-    if (counter > 5) {
-      renderNoDataForProject();
-      return false;
-    }
-
-    if (!window.Data) {
-      clearTimeout(timeout);
-      timeout = setTimeout(function() {
-        renderCharts(counter);
-      }, 100);
-      return false;
-    }
-
+  function renderCharts() {
     hideNoDataForProject();
     renderLastFetched();
 

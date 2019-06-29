@@ -10,10 +10,6 @@
     "eol-last": 2,
     "eqeqeq": 2,
     "guard-for-in": 2,
-    "indent": [
-      2,
-      2
-    ],
     "key-spacing": [
       2,
       {
@@ -35,10 +31,6 @@
       2,
       "always"
     ],
-    "operator-linebreak": [
-      2,
-      "after"
-    ],
     "quotes": [
       2,
       "single",
@@ -51,7 +43,8 @@
   },
   "env": {
     "browser": true,
-    "node": true
+    "node": true,
+    "es6": true
   },
   "globals": {
     "_": true,
