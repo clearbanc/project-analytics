@@ -127,29 +127,6 @@
     chart.draw(data, options);
   }
 
-  function renderStoryTypeChart() {
-    var element = document.getElementById('story-type-data');
-    var chart = new window.google.visualization.AreaChart(element);
-    var data = new window.google.visualization.DataTable();
-
-    data.addColumn('date', 'Date');
-    data.addColumn('number', 'Features');
-    data.addColumn('number', 'Bugs');
-    data.addColumn('number', 'Chores');
-    data.addRows(getCombinedChartData(window.Data.StoryTypeRatios));
-
-    var options = {
-      title: 'Completed Stories by Story Type',
-      titleTextStyle: { fontSize: 16 },
-      isStacked: true,
-      chartArea: chartAreaOptions,
-      focusTarget: 'category',
-      legend: 'none',
-    };
-
-    chart.draw(data, options);
-  }
-
   function renderMonthlyVelocityChart() {
     var element = document.getElementById('monthly-velocity-chart');
     var chart = new window.google.visualization.ColumnChart(element);
@@ -291,7 +268,6 @@
 
     renderCurrentStoryTypeRatioChart();
     renderStoryTypeRatioChart();
-    renderStoryTypeChart();
     renderMonthlyVelocityChart();
     // TODO: Enable once we actually start estimating
     // renderEstimateRatiosChart();
